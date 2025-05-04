@@ -1,9 +1,6 @@
 Minecraft:
   - list
-  - status
-  - version
   - time set day
-  - say bajskorv
   - time set night
   - say {message}
 
