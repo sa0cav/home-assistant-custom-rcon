@@ -1,0 +1,20 @@
+{
+    "domain": "rcon",
+    "name": "RCON",
+    "version": "1.0.0",
+    "config_flow": true,
+    "requirements": [
+        "mcrcon>=0.7.0",
+        "PyYAML>=5.1"
+    ],
+    "dependencies": [],
+    "codeowners": [
+        "@sa0cav"
+    ],
+    "platforms": [
+        "sensor",
+        "button"
+    ],
+    "integration_type": "integration",
+    "iot_class": "local_polling"
+}

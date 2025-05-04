@@ -1,0 +1,7 @@
+# custom_components/rcon/services.yaml
+send_command:
+  description: "Skicka ett RCON-kommando"
+  fields:
+    command:
+      description: "Kommandot som ska skickas"
+      example: "list"

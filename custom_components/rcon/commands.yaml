@@ -1,0 +1,18 @@
+Minecraft:
+  - list
+  - status
+  - version
+  - time set day
+  - say bajskorv
+  - time set night
+  - say {message}
+
+CS:GO:
+  - status
+  - changelevel {map}
+  - rcon_password {password}
+
+Rust:
+  - status
+  - server.save
+  - server.restart
