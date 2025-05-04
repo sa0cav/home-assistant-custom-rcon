@@ -1,6 +1,0 @@
-send_command:
-  description: "Skicka ett valfritt RCON-kommando"
-  fields:
-    command:
-      description: "Kommandot som ska skickas"
-      example: "say Hej från Home Assistant!"
