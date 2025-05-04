@@ -1,7 +1,6 @@
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT
-
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_PASSWORD
 from .const import DOMAIN
 
 DATA_SCHEMA = vol.Schema({
@@ -23,7 +22,6 @@ class RconFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 data_schema=DATA_SCHEMA
             )
 
-        # Undvik duplikat
         await self.async_set_unique_id(user_input[CONF_HOST])
         self._abort_if_unique_id_configured()
 
