@@ -1,6 +1,6 @@
 {
   "name": "Home Assistant Custom RCON",
-  "content_in_root": true,
+  "content_in_root": false,
   "domains": ["rcon"],
   "country": "global",
   "homeassistant": "2023.0.0",
