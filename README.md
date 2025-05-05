@@ -46,4 +46,4 @@ data:
 
 ## License
 
-MIT License
+Non-Commercial License
