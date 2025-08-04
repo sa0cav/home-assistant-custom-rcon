@@ -1,88 +1,76 @@
 # custom_components/rcon/__init__.py
 
 import logging
-from homeassistant.core import HomeAssistant
+import voluptuous as vol
+
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.config_entries import ConfigEntry
-from mcrcon import MCRcon
+from homeassistant.helpers import device_registry, config_validation as cv
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup(hass: HomeAssistant, config: dict):
-    """YAML-support (kan lämnas tom om du bara använder UI)."""
-    return True
+SERVICE_NAME = "send_command"
+SERVICE_SCHEMA = vol.Schema({
+    vol.Required("server"):  cv.string,
+    vol.Required("command"): cv.string,
+})
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Initiera RCON-klient och ladda plattformar."""
-    data = entry.data
-    host = data.get("host")
-    port = data.get("port")
-    # Tolka tom sträng som ingen password
-    password = data.get("password") or None
-
-    # Skapa och anslut klient
-    client = MCRcon(host, password, port)
-    await hass.async_add_executor_job(client.connect)
-
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-        "client": client,
-        "game": data.get("game")
-    }
-
-    _register_service(hass, entry.entry_id)
-
-    # Forwarda till sensor och button
-    await hass.config_entries.async_forward_entry_setup(entry, "sensor")
-    await hass.config_entries.async_forward_entry_setup(entry, "button")
-
+    """Initialize client, device, and rcon.send_command service."""
+    # Store all info needed later
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = entry.data
+    # (Re)register our service
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_NAME,
+        lambda call: hass.async_create_task(handle_send_command(hass, call)),
+        schema=SERVICE_SCHEMA,
+    )
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Stäng av klient och ta bort plattformar."""
-    info = hass.data[DOMAIN].pop(entry.entry_id, None)
-    if info and info.get("client"):
-        await hass.async_add_executor_job(info["client"].disconnect)
-
-    await hass.config_entries.async_forward_entry_unload(entry, "sensor")
-    await hass.config_entries.async_forward_entry_unload(entry, "button")
+    """Clean up when the integration is removed."""
+    hass.services.async_remove(DOMAIN, SERVICE_NAME)
+    hass.data[DOMAIN].pop(entry.entry_id)
     return True
 
-def _register_service(hass: HomeAssistant, entry_id: str):
-    """Registrera rcon.send_command med återanslutning vid fel."""
-    from homeassistant.core import ServiceCall
-    import voluptuous as vol
-    from homeassistant.helpers import config_validation as cv
+async def handle_send_command(hass: HomeAssistant, call: ServiceCall):
+    """Handle rcon.send_command – choose correct backend and fire event."""
+    server = call.data.get("server")
+    cmd = call.data.get("command")
 
-    SERVICE_SCHEMA = vol.Schema({vol.Required("command"): cv.string})
+    # Determine backend based on configuration (example logic)
+    host = hass.data[DOMAIN][call.context.config_entry_id]["host"]
+    port = hass.data[DOMAIN][call.context.config_entry_id].get("port", 25575)
+    password = hass.data[DOMAIN][call.context.config_entry_id].get("password", "")
 
-    async def handle_send_command(call: ServiceCall):
-        cmd = call.data.get("command")
-        info = hass.data[DOMAIN][entry_id]
-        client = info["client"]
-
-        _LOGGER.debug("Skickar RCON-kommando: %s", cmd)
+    try:
+        from mcrcon import MCRcon
+        _LOGGER.debug("Using MCRcon for %s:%s", host, port)
+        client = MCRcon(host, password, port)
+        client.connect()
+        response = client.command(cmd)
+        client.disconnect()
+    except ImportError:
         try:
-            response = await hass.async_add_executor_job(client.command, cmd)
-        except Exception as e:
-            _LOGGER.warning("RCON-anslutning tappad, försöker återansluta: %s", e)
-            await hass.async_add_executor_job(client.disconnect)
-            await hass.async_add_executor_job(client.connect)
-            try:
-                response = await hass.async_add_executor_job(client.command, cmd)
-            except Exception as e2:
-                _LOGGER.error("Återanslutning misslyckades: %s", e2)
-                response = f"Error after reconnect: {e2}"
+            import valve.rcon
+            _LOGGER.debug("Using python-valve for %s:%s", host, port)
+            response = valve.rcon.RCON((host, port), password).execute(cmd)
+        except ImportError:
+            raise RuntimeError("No RCON library installed for the game")
+    except Exception as e:
+        _LOGGER.error("RCON error for %s: %s", server, e)
+        response = f"Error: {e}"
 
-        _LOGGER.debug("RCON-svar: %s", response)
-        hass.bus.async_fire(
-            f"{DOMAIN}_response",
-            {"command": cmd, "response": response}
-        )
-
-    if not hass.services.has_service(DOMAIN, "send_command"):
-        hass.services.async_register(
-            DOMAIN,
-            "send_command",
-            handle_send_command,
-            schema=SERVICE_SCHEMA
-        )
+    # Trim state to a maximum of 255 characters
+    trimmed = response if len(response) <= 255 else response[:252] + "…"
+    hass.bus.async_fire(
+        f"{DOMAIN}_response",
+        {
+            "server":        server,
+            "command":       cmd,
+            "response":      trimmed,
+            "full_response": response,
+        }
+    )
