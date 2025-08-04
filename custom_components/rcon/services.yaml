@@ -1,7 +1,14 @@
-# custom_components/rcon/services.yaml
 send_command:
-  description: "Skicka ett RCON-kommando"
+  name: "Send RCON Command"
+  description: "Send an RCON command to the selected server."
   fields:
+    server:
+      name: "Server"
+      description: "Nickname or ID of the target server."
+      selector:
+        text: {}
     command:
-      description: "Kommandot som ska skickas"
-      example: "list"
+      name: "Command"
+      description: "The command to send."
+      selector:
+        text: {}
