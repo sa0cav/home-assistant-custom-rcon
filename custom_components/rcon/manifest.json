@@ -1,20 +1,20 @@
 {
-    "domain": "rcon",
-    "name": "RCON",
-    "version": "1.0.0",
-    "config_flow": true,
-    "requirements": [
-        "mcrcon>=0.7.0",
-        "PyYAML>=5.1"
-    ],
-    "dependencies": [],
-    "codeowners": [
-        "@sa0cav"
-    ],
-    "platforms": [
-        "sensor",
-        "button"
-    ],
-    "integration_type": "integration",
-    "iot_class": "local_polling"
+  "domain": "rcon",
+  "name": "RCON",
+  "version": "1.0.5",
+  "documentation": "https://github.com/sa0cav/home-assistant-custom-rcon/blob/main/README.md",
+  "issue_tracker": "https://github.com/sa0cav/home-assistant-custom-rcon/issues",
+  "config_flow": true,
+  "requirements": [
+    "mcrcon>=0.7.0",
+    "python-a2s>=1.2.0",
+    "rcon>=2.4.6",
+    "PyYAML>=5.1",
+    "python-valve>=0.2.0"
+  ],
+  "dependencies": [],
+  "codeowners": ["@sa0cav"],
+  "platforms": ["sensor", "button"],
+  "integration_type": "integration",
+  "iot_class": "local_polling"
 }
