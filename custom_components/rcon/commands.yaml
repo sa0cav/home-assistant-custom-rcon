@@ -2,14 +2,8 @@ Minecraft:
   - list
   - time set day
   - time set night
-  - say {message}
 
-CS:GO:
+cs2:
   - status
-  - changelevel {map}
-  - rcon_password {password}
-
-Rust:
-  - status
-  - server.save
-  - server.restart
+  - changelevel de_dust2
+  - changelevel de_nuke
