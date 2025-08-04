@@ -1,16 +1,29 @@
-# custom_components/rcon/const.py
 import os
 import yaml
 
-# Domän för integrationen  # TODO translate
 DOMAIN = "rcon"
+COMMANDS_FILE = os.path.join(os.path.dirname(__file__), "commands.yaml")
 
-# Läs in spel och kommandon från YAML  # TODO translate
-def load_commands() -> dict:
-    here = os.path.dirname(__file__)
-    path = os.path.join(here, "commands.yaml")
-    with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+# Load commands synchronously
+def load_commands_sync() -> dict:
+    try:
+        with open(COMMANDS_FILE, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except FileNotFoundError:
+        return {}
 
-# Tillgängliga spel och deras kommandon  # TODO translate
-GAMES = load_commands()
+# List games for configuration flow
+GAMES = list(load_commands_sync().keys())
+
+# Async version of command loading
+type: ignore
+async def async_load_commands(hass) -> dict:
+    return await hass.async_add_executor_job(load_commands_sync)
+
+import voluptuous as vol
+from homeassistant.helpers import config_validation as cv
+
+SERVICE_SCHEMA = vol.Schema({
+    vol.Required("server"):  cv.string,
+    vol.Required("command"): cv.string,
+})
