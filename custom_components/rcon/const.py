@@ -16,7 +16,6 @@ def load_commands_sync() -> dict:
 GAMES = list(load_commands_sync().keys())
 
 # Async version of command loading
-type: ignore
 async def async_load_commands(hass) -> dict:
     return await hass.async_add_executor_job(load_commands_sync)
 
