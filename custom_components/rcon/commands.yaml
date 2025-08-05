@@ -2,8 +2,28 @@ Minecraft:
   - list
   - time set day
   - time set night
+  - weather clear
+  - weather rain
+  - weather thunder
 
 cs2:
   - status
   - changelevel de_dust2
   - changelevel de_nuke
+  - changelevel de_inferno
+  - changelevel de_mirage
+  - changelevel de_overpass
+  - changelevel de_vertigo
+  - changelevel de_ancient
+  - changelevel de_anubis
+  - mp_restartgame 1
+  - mp_pause_match
+  - mp_unpause_match
+  - bot_kick
+  - bot_add_t
+  - bot_add_ct
+  - bot_quota_mode fill
+  - mp_warmup_end
+  - mp_warmup_start
+  - exec gamemode_competitive
+  - exec gamemode_casual
