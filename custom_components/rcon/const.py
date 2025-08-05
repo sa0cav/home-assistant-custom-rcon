@@ -13,7 +13,8 @@ def load_commands_sync() -> dict:
         return {}
 
 # List games for configuration flow
-GAMES = list(load_commands_sync().keys())
+GAMES = ["cs2", "minecraft"]
+#GAMES = list(load_commands_sync().keys())
 
 # Async version of command loading
 async def async_load_commands(hass) -> dict:
