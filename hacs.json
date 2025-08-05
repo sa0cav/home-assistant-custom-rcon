@@ -1,7 +1,7 @@
 {
   "name": "Home Assistant Custom RCON",
   "content_in_root": false,
-  "domains": ["sensor", "button"],
+  "domains": ["rcon"],
   "country": "global",
   "homeassistant": "2023.0.0",
   "hacs": "1.0.0",
